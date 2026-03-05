@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ÖMER KARAMAN - LA GALİBE İLLAALLAH</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    background:#000;
+    color:#ff0000;
+    font-family:'Courier New',Courier,monospace;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    position:relative;
+    cursor: default;
+}
+
+/* KILIÇ KANVASI */
+#canvas-trail {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9998;
+}
+
+#datetime{
+    position:absolute;
+    top:20px;
+    right:25px;
+    text-align:right;
+    font-size:14px;
+    letter-spacing:2px;
+    z-index:1000;
+    font-weight:bold;
+}
+
+.shine-text{
+    background:linear-gradient(to right,#330000 20%,#ff0000 40%,#ffffff 50%,#ff0000 60%,#330000 80%);
+    background-size:200% auto;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:shine 3s linear infinite;
+    font-weight:bold;
+    text-transform:uppercase;
+}
+@keyframes shine{
+    to{background-position:200% center;}
+}
+
+.bg-header{ position:absolute; top:15%; font-size:clamp(30px,6vw,60px); letter-spacing:10px; z-index:5; width:100%; text-align:center; }
+.bg-footer{ position:absolute; bottom:15%; font-size:clamp(40px,10vw,100px); z-index:5;
+width:100%; text-align:center; font-family: Arial, sans-serif; }
+
+#open-btn{
+    background:transparent;
+    color:#ff0000;
+    border:1px solid #ff0000;
+    padding:15px 50px;
+    cursor:pointer;
+    font-size:18px;
+    letter-spacing:8px;
+    z-index:100;
+    transition:0.3s;
+}
+#open-btn:hover{ background:#ff0000; color:#000; box-shadow:0 0 20px red; }
+
+#main-content{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    border:1px solid #ff0000;
+    padding:40px 20px;
+    width:90%;
+    max-width:400px;
+    background:#000;
+    box-shadow:0 0 30px rgba(255,0,0,0.4);
+    z-index:100;
+    animation:fadeIn 0.3s ease;
+}
+@keyframes fadeIn{ from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+
+.links{ display:flex; flex-direction:column; gap:12px; width:100%;
+margin-bottom:25px; }
+.btn{ border:1px solid #440000; color:#ff0000; padding:12px; text-decoration:none; text-align:center; font-size:14px; letter-spacing:2px; transition:0.2s; }
+.btn:hover{ background:#ff0000; color:#000; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas-trail"></canvas>
+
+<div id="datetime">
+    <div id="date"></div>
+    <div id="time"></div>
+</div>
+
+<div class="bg-header shine-text">ÖMER KARAMAN</div>
+<div class="bg-footer shine-text">لا غالب إلا الله</div>
+
+<button id="open-btn" onclick="openSite()">[ OPEN ]</button>
+
+<div id="main-content">
+    <div class="inner-title shine-text" style="font-size:22px; margin-bottom:25px;">ÖMER KARAMAN</div>
+    <div class="links">
+        <a href="https://t.me/vesvese" class="btn" target="_blank">TELEGRAM</a>
+        <a href="https://wa.me/84929136083" class="btn" target="_blank">WHATSAPP</a>
+    </div>
+    <div class="tagline shine-text" style="font-size:10px; opacity:0.8;">ALLES FUR DIE</div>
+</div>
+
+<script>
+function openSite(){
+    document.getElementById('open-btn').style.display='none';
+    document.getElementById('main-content').style.display='flex';
+}
+
+function updateClock(){
+    const now=new Date();
+    document.getElementById('date').textContent=now.toLocaleDateString('tr-TR');
+    document.getElementById('time').textContent=now.toLocaleTimeString('tr-TR');
+}
+setInterval(updateClock,1000); updateClock();
+
+/* --- ⚔️ AKIŞKAN FİZİKSEL KILIÇ EFEKTİ --- */
+const canvas = document.getElementById('canvas-trail');
+const ctx = canvas.getContext('2d');
+let mouse = { x: 0, y: 0 };
+let dots = [];
+const dotCount = 25;
+
+for (let i = 0; i < dotCount; i++) {
+    dots.push({ x: 0, y: 0 });
+}
+
+window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+});
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    let x = mouse.x;
+    let y = mouse.y;
+    dots.forEach((dot, index) => {
+        dot.x += (x - dot.x) * 0.45;
+        dot.y += (y - dot.y) * 0.45;
+        x = dot.x;
+        y = dot.y;
+    });
+
+    ctx.beginPath();
+    ctx.moveTo(dots[0].x, dots[0].y);
+    
+    for (let i = 1; i < dots.length; i++) {
+        const xc = (dots[i].x + dots[i - 1].x) / 2;
+        const yc = (dots[i].y + dots[i - 1].y) / 2;
+        ctx.quadraticCurveTo(dots[i - 1].x, dots[i - 1].y, xc, yc);
+    }
+
+    ctx.strokeStyle = '#ff0000';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#ff0000';
+    ctx.stroke();
+    
+    requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>
